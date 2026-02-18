@@ -279,6 +279,44 @@
             .juz-selector { max-height: 80px; }
             .scroll-top-btn { bottom: 130px; right: 5px; } /* Adjust for mobile */
         }
+        .scroll-to-active-btn {
+            position: fixed;
+            bottom: 100px; /* Same height as scroll-top-btn */
+            left: 20px;
+            width: 45px;
+            height: 45px;
+            background-color: var(--primary-gold);
+            color: var(--deep-green);
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+        }
+
+        .scroll-to-active-btn.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .scroll-to-active-btn:hover {
+            background-color: #fff;
+            transform: translateY(-5px);
+        }
+
+        /* Adjust for mobile */
+        @media (max-width: 600px) {
+            .scroll-to-active-btn { bottom: 130px; left: 5px; }
+        }
     </style>
 </head>
 <body>
@@ -311,7 +349,9 @@
         </div>
     </div>
 </div>
-
+<button id="scrollToActiveBtn" class="scroll-to-active-btn" onclick="scrollToActive()" title="الذهاب إلى الآية الحالية">
+    📍
+</button>
 <button id="scrollTopBtn" class="scroll-top-btn" onclick="scrollToTop()" title="العودة للأعلى">
     ↑
 </button>
@@ -348,7 +388,8 @@
         reciterSelect: document.getElementById('reciterSelect'),
         surahName: document.getElementById('playerSurahName'),
         ayahNum: document.getElementById('playerAyahNum'),
-        scrollBtn: document.getElementById('scrollTopBtn')
+        scrollBtn: document.getElementById('scrollTopBtn'),
+        activeScrollBtn: document.getElementById('scrollToActiveBtn')
     };
 
     // --- Initialization ---
@@ -407,8 +448,10 @@
     function toggleScrollButton() {
         if (window.scrollY > 300) {
             elements.scrollBtn.classList.add('visible');
+            elements.activeScrollBtn.classList.add('visible'); // Show left button
         } else {
             elements.scrollBtn.classList.remove('visible');
+            elements.activeScrollBtn.classList.remove('visible'); // Hide left button
         }
     }
 
