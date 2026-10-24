@@ -1,590 +1,135 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="emerald">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>القرآن الكريم</title>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@300;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-gold: #d4af37;
-            --primary-gold-dim: #aa8c2c;
-            --deep-green: #081c15;
-            --lighter-green: #1b4332;
-            --glass-bg: rgba(20, 40, 30, 0.6);
-            --glass-border: rgba(212, 175, 55, 0.2);
-            --text-main: #e9f3e6;
-            --active-ayah-bg: rgba(212, 175, 55, 0.15);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>اقرأ — القرآن الكريم</title>
+  <meta name="description" content="اقرأ: مصحف إلكتروني لقراءة القرآن الكريم والاستماع إليه، مع التفسير، والتقويم الهجري، ومواقيت الصلاة، وإمساكية رمضان، والختمة، والمسبحة، واتجاه القبلة — يعمل دون إنترنت.">
+  <meta name="theme-color" content="#06140e">
+  <meta name="color-scheme" content="dark light">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="اقرأ">
+  <meta property="og:title" content="اقرأ — القرآن الكريم">
+  <meta property="og:description" content="اقرأ واستمع للقرآن الكريم، مع التقويم الهجري ومواقيت الصلاة وإمساكية رمضان.">
+  <meta property="og:image" content="icons/icon-512.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-
-        body {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
-            background-attachment: fixed;
-            min-height: 100vh;
-            font-family: 'Noto Sans Arabic', sans-serif;
-            color: var(--text-main);
-            padding-bottom: 140px; /* Space for fixed player */
-            overflow-y: scroll;
-            scroll-behavior: smooth;
-        }
-
-        /* --- Layout --- */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* --- Header & Controls --- */
-        header {
-            text-align: center;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        h1 {
-            font-family: 'Amiri', serif;
-            font-size: 3.5rem;
-            color: var(--primary-gold);
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
-            margin-bottom: 10px;
-        }
-
-        .controls-top {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        select {
-            background: var(--glass-bg);
-            color: #fff;
-            border: 1px solid var(--glass-border);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-family: 'Noto Sans Arabic';
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
-
-        option { background: var(--deep-green); }
-
-        /* --- Juz Grid --- */
-        .juz-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-            gap: 8px;
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .juz-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid transparent;
-            color: #aaa;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: 'Amiri';
-            font-size: 1.1rem;
-        }
-
-        .juz-btn:hover { background: rgba(255,255,255,0.1); color: white; }
-        .juz-btn.active {
-            background: var(--primary-gold);
-            color: var(--deep-green);
-            font-weight: bold;
-            box-shadow: 0 0 15px var(--primary-gold-dim);
-        }
-
-        /* --- Quran Text Display (The Mushaf) --- */
-        .mushaf-container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            padding: 30px;
-            min-height: 200px;
-            position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        }
-
-        .loading-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 20px;
-            z-index: 10;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .loading-overlay.visible { opacity: 1; pointer-events: all; }
-
-        .ayah-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .ayah-item {
-            padding: 15px;
-            border-radius: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .ayah-item:hover { background: rgba(255,255,255,0.03); }
-        
-        .ayah-item.active {
-            background: var(--active-ayah-bg);
-            border-right: 4px solid var(--primary-gold);
-            transform: scale(1.01);
-        }
-
-        .ayah-text {
-            font-family: 'Amiri', serif;
-            font-size: 1.8rem;
-            line-height: 2.2;
-            color: #fff;
-            margin-bottom: 5px;
-        }
-
-        .ayah-info {
-            font-size: 0.8rem;
-            color: var(--primary-gold);
-            opacity: 0.7;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* --- Sticky Player --- */
-        .player-dock {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 95%;
-            max-width: 800px;
-            background: rgba(15, 30, 25, 0.95);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--primary-gold);
-            border-radius: 20px;
-            padding: 15px 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .player-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-            color: #bbb;
-        }
-
-        .current-surah { color: var(--primary-gold); font-weight: bold; }
-
-        .audio-controls-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-        }
-
-        .nav-btn {
-            background: none;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            width: 50px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
-        .nav-btn:hover { background: var(--primary-gold); border-color: var(--primary-gold); color: #000; }
-
-        audio { width: 100%; height: 35px; }
-
-        /* Loader */
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid rgba(255,255,255,0.1);
-            border-left-color: var(--primary-gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* --- Floating Scroll to Top Button --- */
-        .scroll-top-btn {
-            position: fixed;
-            bottom: 100px; /* Positioned above the player dock */
-            right: 20px;
-            width: 45px;
-            height: 45px;
-            background-color: var(--primary-gold);
-            color: var(--deep-green);
-            border: none;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
-            z-index: 90;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .scroll-top-btn.visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .scroll-top-btn:hover {
-            background-color: #fff;
-            transform: translateY(-5px);
-        }
-
-        @media (max-width: 600px) {
-            h1 { font-size: 2.5rem; }
-            .ayah-text { font-size: 1.4rem; }
-            .player-dock { bottom: 10px; width: 96%; padding: 15px; }
-            .juz-selector { max-height: 80px; }
-            .scroll-top-btn { bottom: 130px; right: 5px; } /* Adjust for mobile */
-        }
-        .scroll-to-active-btn {
-            position: fixed;
-            bottom: 100px; /* Same height as scroll-top-btn */
-            left: 20px;
-            width: 45px;
-            height: 45px;
-            background-color: var(--primary-gold);
-            color: var(--deep-green);
-            border: none;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
-            z-index: 90;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(20px);
-        }
-
-        .scroll-to-active-btn.visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .scroll-to-active-btn:hover {
-            background-color: #fff;
-            transform: translateY(-5px);
-        }
-
-        /* Adjust for mobile */
-        @media (max-width: 600px) {
-            .scroll-to-active-btn { bottom: 130px; left: 5px; }
-        }
-    </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.islamic.network">
+  <link rel="preload" href="data/quran.json" as="fetch" crossorigin>
+  <link rel="modulepreload" href="js/app.js">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+  <script>
+    // Apply saved theme & reading size before first paint (no flash)
+    try {
+      var s = (JSON.parse(localStorage.getItem('okraa.v2')) || {}).settings || {};
+      if (s.theme) document.documentElement.dataset.theme = s.theme;
+      if (s.fontSize) document.documentElement.style.setProperty('--qsize', s.fontSize + 'px');
+    } catch (e) {}
+  </script>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>القرآن الكريم</h1>
-        <div class="controls-top">
-            <select id="reciterSelect">
-                <option value="ar.alafasy">مشاري العفاسي</option>
-                <option value="ar.abdulbasitmurattal">عبد الباسط (مرتل)</option>
-                <option value="ar.husary">محمود خليل الحصري</option>
-                <option value="ar.minshawi">محمد صديق المنشاوي</option>
-            </select>
-            <button onclick="scrollToActive()" class="juz-btn" style="width: auto; padding: 0 15px; font-size: 0.9rem;">📍 الآية الحالية</button>
-        </div>
-        <p>Powered By Hadi Koubaissi</p>
-    </header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M15 15.5a2.5 2.5 0 1 1-2.2-3.7 2 2 0 0 0 2.2 3.7z"/></symbol>
+  <symbol id="i-mosque" viewBox="0 0 24 24"><path d="M12 2v2M12 4c-3 1.5-5 3.6-5 6h10c0-2.4-2-4.5-5-6z"/><path d="M5 22V12h14v10M3 22h18M10 22v-4a2 2 0 0 1 4 0v4M2 22V9M22 22V9M2 9l0-2M22 9V7"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1.5"/><rect x="14" y="4" width="4" height="16" rx="1.5"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M17 5v14L7 12z"/><path d="M5 5v14"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M7 5v14l10-7z"/><path d="M19 5v14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.5-4.5"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-font" viewBox="0 0 24 24"><path d="M4 18 9 5l5 13M5.8 14h6.4M15 18l3.5-8 3.5 8M16 15.5h5"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></symbol>
+  <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-locate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22"/></symbol>
+  <symbol id="i-tafsir" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5M9 7h7M9 11h5"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01M12 7v6M9.5 10.5 12 13l2.5-2.5"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
+  <symbol id="i-beads" viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><circle cx="18.5" cy="8" r="2"/><circle cx="18.5" cy="15.5" r="2"/><circle cx="5.5" cy="8" r="2"/><circle cx="5.5" cy="15.5" r="2"/><path d="M12 17v5M10 22h4"/><circle cx="12" cy="17" r="1"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-speed" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/></symbol>
+  <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 40 40"><path d="M20 3L25.1 7.8L32 8L32.2 14.9L37 20L32.2 25.1L32 32L25.1 32.2L20 37L14.9 32.2L8 32L7.8 25.1L3 20L7.8 14.9L8 8L14.9 7.8Z"/></symbol>
+  <symbol id="i-pages" viewBox="0 0 24 24"><rect x="4" y="3" width="13" height="17" rx="2"/><path d="M8 7h5M8 11h5M8 15h3M20 7v13a2 2 0 0 1-2 2H8"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
+  <symbol id="i-fire" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3.3.2 1.6 1.2 2.8 2.5 2.8z"/></symbol>
+  <symbol id="i-lantern" viewBox="0 0 24 24"><path d="M12 2v2M9 4h6M8 7h8l1 2v9l-1 2H8l-1-2V9z"/><path d="M7 9h10M7 18h10M10 22h4M12 12v3"/></symbol>
+</svg>
 
-    <div class="juz-selector" id="juzGrid"></div>
+<div class="bgfx" aria-hidden="true"></div>
 
-    <div class="mushaf-container">
-        <div id="loader" class="loading-overlay">
-            <div class="spinner"></div>
-        </div>
-        <div id="ayahList" class="ayah-list">
-            <div style="text-align: center; padding: 40px; color: #888;">
-                اختر جزءاً للبدء
-            </div>
-        </div>
+<main id="main">
+  <section class="view" id="v-home" data-tab="home" hidden></section>
+  <section class="view" id="v-index" data-tab="index" hidden></section>
+  <section class="view" id="v-reader" data-tab="index" hidden></section>
+  <section class="view" id="v-calendar" data-tab="calendar" hidden></section>
+  <section class="view" id="v-prayer" data-tab="prayer" hidden></section>
+  <section class="view" id="v-more" data-tab="more" hidden></section>
+  <section class="view" id="v-khatma" data-tab="more" hidden></section>
+  <section class="view" id="v-tasbeeh" data-tab="more" hidden></section>
+  <section class="view" id="v-qibla" data-tab="more" hidden></section>
+  <section class="view" id="v-settings" data-tab="more" hidden></section>
+  <noscript><p class="empty">يحتاج هذا التطبيق إلى تفعيل JavaScript.</p></noscript>
+</main>
+
+<div class="mini" id="mini" hidden>
+  <div class="bar" id="miniBar" role="slider" aria-label="تقدم التلاوة" tabindex="-1"><i></i></div>
+  <div class="row">
+    <button class="play" id="miniPlay" aria-label="تشغيل"><svg class="ic fill"><use href="#i-play"/></svg></button>
+    <button class="icon-btn" id="miniPrev" aria-label="الآية السابقة"><svg class="ic"><use href="#i-prev"/></svg></button>
+    <button class="icon-btn" id="miniNext" aria-label="الآية التالية"><svg class="ic"><use href="#i-next"/></svg></button>
+    <div class="info" id="miniInfo" role="button" tabindex="0" aria-label="خيارات التلاوة">
+      <b id="miniTitle">—</b>
+      <small id="miniSub">—</small>
     </div>
+    <button class="icon-btn" id="miniMore" aria-label="خيارات التلاوة"><svg class="ic"><use href="#i-settings"/></svg></button>
+  </div>
 </div>
-<button id="scrollToActiveBtn" class="scroll-to-active-btn" onclick="scrollToActive()" title="الذهاب إلى الآية الحالية">
-    📍
-</button>
-<button id="scrollTopBtn" class="scroll-top-btn" onclick="scrollToTop()" title="العودة للأعلى">
-    ↑
-</button>
 
-<div class="player-dock">
-    <div class="player-info">
-        <span id="playerSurahName" class="current-surah">...</span>
-        <span id="playerAyahNum">...</span>
-    </div>
-    
-    <div class="audio-controls-wrapper">
-        <button class="nav-btn" onclick="playPrev()" title="الآية السابقة">❮</button>
-        <audio id="mainAudio" controls controlsList="nodownload"></audio>
-        <button class="nav-btn" onclick="playNext()" title="الآية التالية">❯</button>
-    </div>
+<nav class="tabbar" id="tabbar" aria-label="التنقل الرئيسي">
+  <div class="tabs">
+    <a href="#/" data-tab="home"><span class="pill"><svg class="ic"><use href="#i-home"/></svg></span>الرئيسية</a>
+    <a href="#/index" data-tab="index"><span class="pill"><svg class="ic"><use href="#i-book"/></svg></span>المصحف</a>
+    <a href="#/calendar" data-tab="calendar"><span class="pill"><svg class="ic"><use href="#i-calendar"/></svg></span>التقويم</a>
+    <a href="#/prayer" data-tab="prayer"><span class="pill"><svg class="ic"><use href="#i-mosque"/></svg></span>الصلاة</a>
+    <a href="#/more" data-tab="more"><span class="pill"><svg class="ic"><use href="#i-grid"/></svg></span>المزيد</a>
+  </div>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true">
+  <div class="sheet-grip" id="sheetGrip"></div>
+  <div class="sheet-body" id="sheetBody"></div>
 </div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
 
-<script>
-    // --- Configuration & State ---
-    const STATE = {
-        reciter: localStorage.getItem('quran_reciter') || 'ar.alafasy',
-        currentJuz: 1,
-        currentAyahIndex: 0,
-        juzData: [],
-        isPlaying: false
-    };
-
-    // --- DOM Elements ---
-    const elements = {
-        audio: document.getElementById('mainAudio'),
-        juzGrid: document.getElementById('juzGrid'),
-        ayahList: document.getElementById('ayahList'),
-        loader: document.getElementById('loader'),
-        reciterSelect: document.getElementById('reciterSelect'),
-        surahName: document.getElementById('playerSurahName'),
-        ayahNum: document.getElementById('playerAyahNum'),
-        scrollBtn: document.getElementById('scrollTopBtn'),
-        activeScrollBtn: document.getElementById('scrollToActiveBtn')
-    };
-
-    // --- Initialization ---
-    function init() {
-        // Generate Juz Buttons
-        for (let i = 1; i <= 30; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'juz-btn';
-            btn.textContent = i;
-            btn.onclick = () => loadJuz(i);
-            btn.id = `juz-btn-${i}`;
-            elements.juzGrid.appendChild(btn);
-        }
-
-        // Restore Settings
-        elements.reciterSelect.value = STATE.reciter;
-        
-        // Restore Last Session
-        const savedJuz = localStorage.getItem('quran_juz');
-        const savedIndex = localStorage.getItem('quran_index');
-        
-        if (savedJuz) {
-            loadJuz(parseInt(savedJuz), parseInt(savedIndex) || 0, false);
-        }
-
-        // Event Listeners
-        elements.audio.onended = handleAyahEnd;
-        elements.audio.onplay = () => STATE.isPlaying = true;
-        elements.audio.onpause = () => STATE.isPlaying = false;
-        
-        elements.reciterSelect.onchange = (e) => {
-            STATE.reciter = e.target.value;
-            localStorage.setItem('quran_reciter', STATE.reciter);
-            if (STATE.juzData.length > 0) {
-                loadJuz(STATE.currentJuz, STATE.currentAyahIndex, true); 
-            }
-        };
-
-        // Scroll Event for Button Visibility
-        window.addEventListener('scroll', toggleScrollButton);
-
-        // Keyboard Shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                STATE.isPlaying ? elements.audio.pause() : elements.audio.play();
-            } else if (e.code === 'ArrowLeft') {
-                playNext();
-            } else if (e.code === 'ArrowRight') {
-                playPrev();
-            }
-        });
-    }
-
-    // --- Scroll Functions ---
-    function toggleScrollButton() {
-        if (window.scrollY > 300) {
-            elements.scrollBtn.classList.add('visible');
-            elements.activeScrollBtn.classList.add('visible'); // Show left button
-        } else {
-            elements.scrollBtn.classList.remove('visible');
-            elements.activeScrollBtn.classList.remove('visible'); // Hide left button
-        }
-    }
-
-    function scrollToTop() {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    }
-
-    // --- Core Logic ---
-
-    async function loadJuz(juzNumber, startIndex = 0, autoPlay = true) {
-        try {
-            elements.loader.classList.add('visible');
-            
-            // Update UI State
-            document.querySelectorAll('.juz-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`juz-btn-${juzNumber}`)?.classList.add('active');
-
-            STATE.currentJuz = juzNumber;
-            
-            const response = await fetch(`https://api.alquran.cloud/v1/juz/${juzNumber}/${STATE.reciter}`);
-            const data = await response.json();
-            
-            if (data.code !== 200) throw new Error("Failed to fetch");
-
-            STATE.juzData = data.data.ayahs;
-            
-            renderAyahs();
-            playAyah(startIndex, autoPlay);
-
-            localStorage.setItem('quran_juz', juzNumber);
-
-        } catch (error) {
-            console.error(error);
-            elements.ayahList.innerHTML = `<div style="text-align:center; color:#ff6b6b">❌ حدث خطأ أثناء التحميل.<br>تأكد من اتصالك بالإنترنت.</div>`;
-        } finally {
-            elements.loader.classList.remove('visible');
-        }
-    }
-
-    function renderAyahs() {
-        elements.ayahList.innerHTML = '';
-        
-        STATE.juzData.forEach((ayah, index) => {
-            const div = document.createElement('div');
-            div.className = 'ayah-item';
-            div.id = `ayah-${index}`;
-            div.onclick = () => playAyah(index, true);
-            
-            div.innerHTML = `
-                <div class="ayah-text">${ayah.text}</div>
-                <div class="ayah-info">
-                    <span>${ayah.surah.name}</span>
-                    <span>آية ${ayah.numberInSurah}</span>
-                </div>
-            `;
-            elements.ayahList.appendChild(div);
-        });
-    }
-
-    function playAyah(index, autoPlay = true) {
-        if (index < 0 || index >= STATE.juzData.length) return;
-
-        STATE.currentAyahIndex = index;
-        const ayah = STATE.juzData[index];
-
-        elements.audio.src = ayah.audio;
-        if (autoPlay) elements.audio.play();
-
-        highlightActiveAyah(index);
-        elements.surahName.innerText = ayah.surah.name;
-        elements.ayahNum.innerText = `الآية ${ayah.numberInSurah}`;
-
-        localStorage.setItem('quran_index', index);
-        
-        if (index + 1 < STATE.juzData.length) {
-            const nextAudio = new Audio();
-            nextAudio.src = STATE.juzData[index + 1].audio;
-        }
-    }
-
-    function highlightActiveAyah(index) {
-        document.querySelectorAll('.ayah-item').forEach(el => el.classList.remove('active'));
-        const activeEl = document.getElementById(`ayah-${index}`);
-        if (activeEl) {
-            activeEl.classList.add('active');
-            scrollToActive();
-        }
-    }
-
-    function scrollToActive() {
-        const activeEl = document.getElementById(`ayah-${STATE.currentAyahIndex}`);
-        if (activeEl) {
-            activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }
-
-    function handleAyahEnd() {
-        if (STATE.currentAyahIndex < STATE.juzData.length - 1) {
-            playAyah(STATE.currentAyahIndex + 1, true);
-        } else {
-            if (STATE.currentJuz < 30) {
-                loadJuz(STATE.currentJuz + 1, 0, true);
-            } else {
-                alert("صدق الله العظيم - أتممت الختمة بفضل الله");
-            }
-        }
-    }
-
-    function playNext() {
-        if (STATE.currentAyahIndex < STATE.juzData.length - 1) {
-            playAyah(STATE.currentAyahIndex + 1, true);
-        } else if (STATE.currentJuz < 30) {
-            loadJuz(STATE.currentJuz + 1, 0, true);
-        }
-    }
-
-    function playPrev() {
-        if (elements.audio.currentTime > 3) {
-            elements.audio.currentTime = 0; 
-        } else {
-            if (STATE.currentAyahIndex > 0) {
-                playAyah(STATE.currentAyahIndex - 1, true);
-            } else if (STATE.currentJuz > 1) {
-                loadJuz(STATE.currentJuz - 1, 0, true);
-            }
-        }
-    }
-
-    init();
-
-</script>
+<script type="module" src="js/app.js"></script>
 </body>
 </html>

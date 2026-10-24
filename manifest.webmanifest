@@ -1,0 +1,28 @@
+{
+  "id": "./",
+  "name": "اقرأ — القرآن الكريم",
+  "short_name": "اقرأ",
+  "description": "اقرأ واستمع للقرآن الكريم مع التفسير والتقويم الهجري ومواقيت الصلاة وإمساكية رمضان — يعمل دون إنترنت.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./#/",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#06140e",
+  "theme_color": "#06140e",
+  "categories": ["books", "education", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "تابع القراءة", "short_name": "المصحف", "url": "./#/index", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "مواقيت الصلاة", "short_name": "الصلاة", "url": "./#/prayer", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "التقويم الهجري", "short_name": "التقويم", "url": "./#/calendar", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "المسبحة", "short_name": "المسبحة", "url": "./#/tasbeeh", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
