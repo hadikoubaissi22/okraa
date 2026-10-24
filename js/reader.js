@@ -28,7 +28,7 @@ function build() {
       <div class="title" data-act="jump" role="button" tabindex="0" aria-label="انتقال سريع">
         <b id="rTitle">…</b><small id="rSub">&nbsp;</small>
       </div>
-      <button class="icon-btn" data-act="listen" aria-label="استماع">${icon('headphones')}</button>
+      <button class="icon-btn" data-act="locate" aria-label="الذهاب إلى الآية الحالية" title="الذهاب إلى الآية الحالية">${icon('locate')}</button>
       <button class="icon-btn" data-act="display" aria-label="إعدادات العرض">${icon('font')}</button>
       <i class="read-progress" id="rProg"></i>
     </header>
@@ -285,9 +285,13 @@ function onClick(e) {
   if (act === 'jump') return jumpSheet();
   if (act === 'display') return displaySheet();
   if (act === 'search') { location.hash = '#/index/search'; return; }
-  if (act === 'listen') {
-    const i = player.P.i != null && player.P.i >= R.from && player.P.i < R.to ? player.P.i : (current ?? R.from);
-    if (player.P.playing) player.pause(); else player.play(i);
+  if (act === 'locate') {
+    // The ayah being recited (or last played), otherwise the saved reading position
+    const i = player.P.i ?? S.lastRead?.i;
+    if (i == null) { toast('لا توجد آية حالية بعد — اضغط على أي آية للاستماع'); return; }
+    lastUserScroll = 0; // let auto-follow resume
+    if (i < R.from || i >= R.to) swapUnit(R.kind, Q.unitOf(R.kind, i), i);
+    else scrollToAyah(i, { block: 'center', smooth: true });
     return;
   }
   if (!host) return;

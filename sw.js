@@ -1,6 +1,6 @@
 // اقرأ — service worker: offline app shell, Quran text, fonts and tafsir caching.
 // Bump VERSION when shipping changes so installed apps pick them up cleanly.
-const VERSION = 'okraa-v2.0.0';
+const VERSION = 'okraa-v2.0.1';
 const SHELL = `${VERSION}-shell`;
 const RUNTIME = 'okraa-runtime';
 const FONTS = 'okraa-fonts';
